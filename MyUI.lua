@@ -25,24 +25,16 @@ function MyUI:CreateWindow(config)
     -- Create the main UI window
     local screenGui = Instance.new("ScreenGui")
     local mainFrame = Instance.new("Frame")
-    local shadowFrame = Instance.new("Frame") -- Shadow effect for main frame
 
     -- Window Styling
     screenGui.Name = window.Title
     screenGui.Parent = game.CoreGui
 
-    shadowFrame.Size = UDim2.new(0.32, 0, 0.52, 0)
-    shadowFrame.Position = UDim2.new(0.34, 0, 0.24, 0)
-    shadowFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    shadowFrame.BackgroundTransparency = 0.5
-    shadowFrame.BorderSizePixel = 0
-    shadowFrame.Parent = screenGui
-
-    mainFrame.Size = UDim2.new(1, -8, 1, -8)
-    mainFrame.Position = UDim2.new(0, 4, 0, 4)
+    mainFrame.Size = UDim2.new(0.32, 0, 0.52, 0)
+    mainFrame.Position = UDim2.new(0.34, 0, 0.24, 0)
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark theme color
     mainFrame.BorderSizePixel = 0
-    mainFrame.Parent = shadowFrame
+    mainFrame.Parent = screenGui
     createUICorner(mainFrame, 10) -- Rounded corners
 
     -- Title Label
@@ -55,7 +47,7 @@ function MyUI:CreateWindow(config)
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = mainFrame
 
-    -- Close Button (Improved)
+    -- Close Button
     local closeButton = Instance.new("TextButton")
     closeButton.Text = "X"
     closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
@@ -73,7 +65,7 @@ function MyUI:CreateWindow(config)
         window:Destroy()
     end)
 
-    -- Draggable functionality
+    -- Draggable functionality (Smooth dragging)
     local dragging = false
     local dragStart
     local dragInput
