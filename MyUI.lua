@@ -1,4 +1,3 @@
--- Improved Custom UI Library Framework
 local MyUI = {}
 
 -- Utility function for creating rounded corners
@@ -8,11 +7,21 @@ local function createUICorner(parent, cornerRadius)
     uiCorner.Parent = parent
 end
 
+-- Utility function to create button hover effect
+local function createHoverEffect(button, defaultColor, hoverColor)
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = hoverColor
+    end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = defaultColor
+    end)
+end
+
 -- Function to create a new window
 function MyUI:CreateWindow(config)
     local window = {}
     window.Title = config.Name or "Untitled Window"
-
+    
     -- Create the main UI window
     local screenGui = Instance.new("ScreenGui")
     local mainFrame = Instance.new("Frame")
@@ -22,31 +31,6 @@ function MyUI:CreateWindow(config)
     screenGui.Name = window.Title
     screenGui.Parent = game.CoreGui
 
-    -- Loading Animation
-    local loadingFrame = Instance.new("Frame")
-    loadingFrame.Size = UDim2.new(0, 100, 0, 100)
-    loadingFrame.Position = UDim2.new(0.5, -50, 0.5, -50)
-    loadingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    loadingFrame.Parent = screenGui
-    createUICorner(loadingFrame, 8)
-
-    local loadingText = Instance.new("TextLabel")
-    loadingText.Text = "Loading..."
-    loadingText.Size = UDim2.new(1, 0, 1, 0)
-    loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    loadingText.Font = Enum.Font.GothamBold
-    loadingText.TextScaled = true
-    loadingText.Parent = loadingFrame
-
-    -- Animate loading by fading out
-    task.wait(1)
-    for i = 1, 10 do
-        loadingFrame.BackgroundTransparency = loadingFrame.BackgroundTransparency + 0.1
-        task.wait(0.05)
-    end
-    loadingFrame:Destroy()
-
-    -- Set up shadow and main frame for window
     shadowFrame.Size = UDim2.new(0.32, 0, 0.52, 0)
     shadowFrame.Position = UDim2.new(0.34, 0, 0.24, 0)
     shadowFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -56,10 +40,10 @@ function MyUI:CreateWindow(config)
 
     mainFrame.Size = UDim2.new(1, -8, 1, -8)
     mainFrame.Position = UDim2.new(0, 4, 0, 4)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark theme color
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = shadowFrame
-    createUICorner(mainFrame, 10)
+    createUICorner(mainFrame, 10) -- Rounded corners
 
     -- Title Label
     local titleLabel = Instance.new("TextLabel")
@@ -71,26 +55,27 @@ function MyUI:CreateWindow(config)
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = mainFrame
 
-    -- Close Button
+     -- Close Button
     local closeButton = Instance.new("TextButton")
     closeButton.Text = "X"
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -35, 0, 5)
-    closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-    closeButton.BackgroundTransparency = 1
-    closeButton.Font = Enum.Font.GothamBold
-    closeButton.TextSize = 18
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(1, -40, 0, 10)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.Gotham
+    closeButton.TextSize = 20
     closeButton.Parent = mainFrame
+    createUICorner(closeButton, 5)
 
+    -- Close Button functionality
     closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
+        window:Destroy()
     end)
 
     window.Gui = screenGui
     window.MainFrame = mainFrame
     window.Tabs = {}
 
-    -- Function to create a new tab
     function window:CreateTab(name)
         local tab = {}
         tab.Name = name or "Tab"
@@ -100,13 +85,20 @@ function MyUI:CreateWindow(config)
         tabButton.Text = tab.Name
         tabButton.Size = UDim2.new(0.2, 0, 0.08, 0)
         tabButton.Position = UDim2.new(#window.Tabs * 0.21, 0, 0.1, 0)
-        tabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         tabButton.Font = Enum.Font.Gotham
         tabButton.TextSize = 14
         tabButton.BorderSizePixel = 0
         tabButton.Parent = mainFrame
         createUICorner(tabButton, 6)
+        createHoverEffect(tabButton, Color3.fromRGB(50, 50, 50), Color3.fromRGB(70, 70, 70)) -- Hover effect
+
+        -- Outline effect
+        local outline = Instance.new("UIStroke")
+        outline.Thickness = 2
+        outline.Color = Color3.fromRGB(0, 170, 255) -- Accent color
+        outline.Parent = tabButton
 
         local tabFrame = Instance.new("Frame")
         tabFrame.Size = UDim2.new(1, 0, 0.8, 0)
@@ -119,14 +111,24 @@ function MyUI:CreateWindow(config)
         tabButton.MouseButton1Click:Connect(function()
             for _, t in pairs(window.Tabs) do
                 t.TabFrame.Visible = false
+                -- Remove tab highlight effect
+                t.TabButton.BorderColor3 = Color3.fromRGB(50, 50, 50)
             end
             tabFrame.Visible = true
+            -- Highlight selected tab
+            tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255)
         end)
 
         tab.TabFrame = tabFrame
+        tab.TabButton = tabButton
         table.insert(window.Tabs, tab)
 
-        -- Function to create a new section in the tab
+        -- Automatically show the first tab
+        if #window.Tabs == 1 then
+            tabFrame.Visible = true
+            tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255) -- Highlight the first tab
+        end
+
         function tab:CreateSection(name)
             local section = {}
             section.Name = name or "Section"
@@ -134,7 +136,7 @@ function MyUI:CreateWindow(config)
             -- Section Frame
             local sectionFrame = Instance.new("Frame")
             sectionFrame.Size = UDim2.new(1, 0, 0.3, 0)
-            sectionFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            sectionFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Dark section background
             sectionFrame.BorderSizePixel = 0
             sectionFrame.Parent = tabFrame
             createUICorner(sectionFrame, 8)
@@ -150,7 +152,6 @@ function MyUI:CreateWindow(config)
 
             section.Frame = sectionFrame
 
-            -- Function to create a button in the section
             function section:CreateButton(text, callback)
                 local button = Instance.new("TextButton")
                 button.Text = text or "Button"
@@ -163,14 +164,7 @@ function MyUI:CreateWindow(config)
                 button.Parent = sectionFrame
                 button.BorderSizePixel = 0
                 createUICorner(button, 6)
-
-                -- Add a hover effect for the button
-                button.MouseEnter:Connect(function()
-                    button.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-                end)
-                button.MouseLeave:Connect(function()
-                    button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-                end)
+                createHoverEffect(button, Color3.fromRGB(0, 170, 255), Color3.fromRGB(0, 200, 255)) -- Button hover effect
 
                 button.MouseButton1Click:Connect(function()
                     if callback then
