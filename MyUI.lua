@@ -55,7 +55,7 @@ function MyUI:CreateWindow(config)
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = mainFrame
 
-     -- Close Button
+    -- Close Button (Improved)
     local closeButton = Instance.new("TextButton")
     closeButton.Text = "X"
     closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
@@ -68,8 +68,36 @@ function MyUI:CreateWindow(config)
     createUICorner(closeButton, 5)
 
     -- Close Button functionality
+    createHoverEffect(closeButton, Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 50, 50)) -- Hover effect
     closeButton.MouseButton1Click:Connect(function()
         window:Destroy()
+    end)
+
+    -- Draggable functionality
+    local dragStart, dragInput, dragDelta
+    local function updateDrag(input)
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(mainFrame.Position.X.Scale, mainFrame.Position.X.Offset + delta.X, mainFrame.Position.Y.Scale, mainFrame.Position.Y.Offset + delta.Y)
+    end
+
+    -- Start dragging
+    titleLabel.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragStart = input.Position
+            dragInput = input
+            dragInput.Changed:Connect(function()
+                if dragInput.UserInputState == Enum.UserInputState.End then
+                    dragInput = nil
+                end
+            end)
+        end
+    end)
+
+    -- Update window position while dragging
+    titleLabel.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragInput then
+            updateDrag(input)
+        end
     end)
 
     window.Gui = screenGui
@@ -162,27 +190,17 @@ function MyUI:CreateWindow(config)
                 button.Font = Enum.Font.Gotham
                 button.TextSize = 16
                 button.Parent = sectionFrame
-                button.BorderSizePixel = 0
-                createUICorner(button, 6)
-                createHoverEffect(button, Color3.fromRGB(0, 170, 255), Color3.fromRGB(0, 200, 255)) -- Button hover effect
-
-                button.MouseButton1Click:Connect(function()
-                    if callback then
-                        callback()
-                    end
-                end)
+                createUICorner(button, 5)
+                createHoverEffect(button, Color3.fromRGB(0, 170, 255), Color3.fromRGB(0, 130, 200)) -- Hover effect
+                
+                -- Button click callback
+                button.MouseButton1Click:Connect(callback)
             end
 
             return section
         end
 
         return tab
-    end
-
-    function window:Destroy()
-        if screenGui then
-            screenGui:Destroy()
-        end
     end
 
     return window
