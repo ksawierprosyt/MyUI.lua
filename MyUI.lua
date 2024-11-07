@@ -51,7 +51,7 @@ function MyUI:CreateWindow(config)
     titleLabel.Size = UDim2.new(1, 0, 0.1, 0)
     titleLabel.BackgroundTransparency = 1
     titleLabel.TextScaled = true
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text color
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = mainFrame
 
@@ -74,20 +74,25 @@ function MyUI:CreateWindow(config)
     end)
 
     -- Draggable functionality
-    local dragStart, dragInput, dragDelta
+    local dragging = false
+    local dragStart
+    local dragInput
+    local startPos
+
     local function updateDrag(input)
         local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(mainFrame.Position.X.Scale, mainFrame.Position.X.Offset + delta.X, mainFrame.Position.Y.Scale, mainFrame.Position.Y.Offset + delta.Y)
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 
     -- Start dragging
     titleLabel.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
             dragStart = input.Position
-            dragInput = input
-            dragInput.Changed:Connect(function()
-                if dragInput.UserInputState == Enum.UserInputState.End then
-                    dragInput = nil
+            startPos = mainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
                 end
             end)
         end
@@ -95,7 +100,7 @@ function MyUI:CreateWindow(config)
 
     -- Update window position while dragging
     titleLabel.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragInput then
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
             updateDrag(input)
         end
     end)
@@ -196,8 +201,6 @@ function MyUI:CreateWindow(config)
                 -- Button click callback
                 button.MouseButton1Click:Connect(callback)
             end
-
-            return section
         end
 
         return tab
