@@ -132,7 +132,7 @@ function MyUI:CreateWindow(config)
         imageUrlTextbox.TextColor3 = newColor
     end)
 
-    -- Slider Example
+    -- Slider Example (Custom Implementation)
     local sliderFrame = Instance.new("Frame")
     sliderFrame.Size = UDim2.new(0.8, 0, 0.1, 0)
     sliderFrame.Position = UDim2.new(0.1, 0, 0.35, 0)
@@ -145,59 +145,42 @@ function MyUI:CreateWindow(config)
     sliderValueLabel.Position = UDim2.new(0, 0, 0, 0)
     sliderValueLabel.Parent = sliderFrame
 
-    local slider = Instance.new("Slider")
+    -- Custom slider implementation
+    local slider = Instance.new("Frame")
     slider.Size = UDim2.new(1, 0, 0.8, 0)
     slider.Position = UDim2.new(0, 0, 0.2, 0)
-    slider.Max = 100
-    slider.Min = 0
-    slider.Value = 50
+    slider.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
     slider.Parent = sliderFrame
-    slider.Changed:Connect(function()
-        sliderValueLabel.Text = "Slider Value: " .. math.floor(slider.Value)
-    end)
 
-    -- Dropdown Menu
-    local dropdown = Instance.new("TextButton")
-    dropdown.Text = "Select Option"
-    dropdown.Size = UDim2.new(0.2, 0, 0.1, 0)
-    dropdown.Position = UDim2.new(0.6, 0, 0.5, 0)
-    dropdown.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    dropdown.Parent = configFrame
-    dropdown.MouseButton1Click:Connect(function()
-        -- Example of a simple dropdown menu
-        local options = {"Option 1", "Option 2", "Option 3"}
-        local menu = Instance.new("Frame")
-        menu.Size = UDim2.new(0, 100, 0, #options * 30)
-        menu.Position = UDim2.new(0, 0, 0, 40)
-        menu.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        menu.Parent = dropdown
+    local sliderThumb = Instance.new("Frame")
+    sliderThumb.Size = UDim2.new(0, 10, 1, 0)
+    sliderThumb.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    sliderThumb.Position = UDim2.new(0, 0, 0, 0)
+    sliderThumb.Parent = slider
 
-        for i, option in ipairs(options) do
-            local optionButton = Instance.new("TextButton")
-            optionButton.Text = option
-            optionButton.Size = UDim2.new(1, 0, 0, 30)
-            optionButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
-            optionButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-            optionButton.Parent = menu
-            optionButton.MouseButton1Click:Connect(function()
-                dropdown.Text = option
-                menu:Destroy() -- Hide dropdown
-            end)
+    local dragging = false
+    sliderThumb.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
         end
     end)
 
-    -- Close Button (for UI window)
-    local closeButton = Instance.new("TextButton")
-    closeButton.Text = "X"
-    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
-    closeButton.Position = UDim2.new(0.9, 0, 0, 0)
-    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    closeButton.Parent = mainFrame
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
+    sliderThumb.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
     end)
 
-    return mainFrame
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging then
+            local newPosition = math.clamp(input.Position.X - slider.AbsolutePosition.X, 0, slider.AbsoluteSize.X)
+            sliderThumb.Position = UDim2.new(0, newPosition, 0, 0)
+            local value = math.floor((newPosition / slider.AbsoluteSize.X) * 100)
+            sliderValueLabel.Text = "Slider Value: " .. value
+        end
+    end)
+
+    return screenGui
 end
 
 return MyUI
