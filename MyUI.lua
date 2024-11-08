@@ -105,51 +105,94 @@ function MyUI:CreateWindow(config)
     window.MainFrame = mainFrame
     window.Tabs = {}
 
-    function window:CreateTab(name)
-        local tab = {}
-        tab.Name = name or "Tab"
+   function window:CreateTab(name)
+    local tab = {}
+    tab.Name = name or "Tab"
 
-        -- Tab Button
-        local tabButton = Instance.new("TextButton")
-        tabButton.Text = tab.Name
-        tabButton.Size = UDim2.new(0.2, 0, 0.08, 0)
-        tabButton.Position = UDim2.new(#window.Tabs * 0.21, 0, 0.1, 0)
-        tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tabButton.Font = Enum.Font.Gotham
-        tabButton.TextSize = 14
-        tabButton.BorderSizePixel = 0
-        tabButton.Parent = mainFrame
-        createUICorner(tabButton, 6)
-        createHoverEffect(tabButton, Color3.fromRGB(50, 50, 50), Color3.fromRGB(70, 70, 70))
+    -- Tab Button
+    local tabButton = Instance.new("TextButton")
+    tabButton.Text = tab.Name
+    tabButton.Size = UDim2.new(0.2, 0, 0.08, 0)
+    tabButton.Position = UDim2.new((#window.Tabs - 1) * 0.21, 0, 0.1, 0)
+    tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabButton.Font = Enum.Font.Gotham
+    tabButton.TextSize = 14
+    tabButton.BorderSizePixel = 0
+    tabButton.Parent = mainFrame
+    createUICorner(tabButton, 6)
+    createHoverEffect(tabButton, Color3.fromRGB(50, 50, 50), Color3.fromRGB(70, 70, 70))
 
-        -- Tab Frame (only one displayed at a time)
-        local tabFrame = Instance.new("Frame")
-        tabFrame.Size = UDim2.new(1, 0, 0.8, 0)
-        tabFrame.Position = UDim2.new(0, 0, 0.18, 0)
-        tabFrame.BackgroundTransparency = 1
-        tabFrame.Visible = false -- Only visible when selected
-        tabFrame.Parent = mainFrame
+    -- Tab Frame (only one displayed at a time)
+    local tabFrame = Instance.new("Frame")
+    tabFrame.Size = UDim2.new(1, 0, 0.8, 0)
+    tabFrame.Position = UDim2.new(0, 0, 0.18, 0)
+    tabFrame.BackgroundTransparency = 1
+    tabFrame.Visible = false -- Only visible when selected
+    tabFrame.Parent = mainFrame
 
-        -- Show the selected tab's content on button click
-        tabButton.MouseButton1Click:Connect(function()
-            for _, t in pairs(window.Tabs) do
-                t.TabFrame.Visible = false -- Hide all tab frames
-                t.TabButton.BorderColor3 = Color3.fromRGB(50, 50, 50) -- Remove highlight from all buttons
-            end
-            tabFrame.Visible = true -- Show only the selected tab
-            tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255) -- Highlight the selected tab
-        end)
-
-        tab.TabFrame = tabFrame
-        tab.TabButton = tabButton
-        table.insert(window.Tabs, tab)
-
-        -- Automatically show the first tab
-        if #window.Tabs == 1 then
-            tabFrame.Visible = true
-            tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255) -- Highlight the first tab
+    -- Show the selected tab's content on button click
+    tabButton.MouseButton1Click:Connect(function()
+        for _, t in pairs(window.Tabs) do
+            t.TabFrame.Visible = false -- Hide all tab frames
+            t.TabButton.BorderColor3 = Color3.fromRGB(50, 50, 50) -- Remove highlight from all buttons
         end
+        tabFrame.Visible = true -- Show only the selected tab
+        tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255) -- Highlight the selected tab
+    end)
+
+    tab.TabFrame = tabFrame
+    tab.TabButton = tabButton
+    table.insert(window.Tabs, tab)
+
+    -- Automatically show the first tab
+    if #window.Tabs == 1 then
+        tabFrame.Visible = true
+        tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255) -- Highlight the first tab
+    end
+
+    function tab:CreateSection(name)
+        local section = {}
+        section.Name = name or "Section"
+        
+        -- Section Frame
+        local sectionFrame = Instance.new("Frame")
+        sectionFrame.Size = UDim2.new(1, 0, 0.3, 0)
+        sectionFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        sectionFrame.BorderSizePixel = 0
+        sectionFrame.Parent = tabFrame
+        createUICorner(sectionFrame, 8)
+
+        local sectionLabel = Instance.new("TextLabel")
+        sectionLabel.Text = section.Name
+        sectionLabel.Size = UDim2.new(1, 0, 0.2, 0)
+        sectionLabel.BackgroundTransparency = 1
+        sectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        sectionLabel.Font = Enum.Font.Gotham
+        sectionLabel.TextScaled = true
+        sectionLabel.Parent = sectionFrame
+
+        section.Frame = sectionFrame
+
+        function section:CreateButton(text, callback)
+            local button = Instance.new("TextButton")
+            button.Text = text or "Button"
+            button.Size = UDim2.new(0.9, 0, 0.3, 0)
+            button.Position = UDim2.new(0.05, 0, 0.4, 0)
+            button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            button.Font = Enum.Font.Gotham
+            button.TextSize = 16
+            button.Parent = sectionFrame
+            createUICorner(button, 5)
+            createHoverEffect(button, Color3.fromRGB(0, 170, 255), Color3.fromRGB(0, 130, 200))
+            
+            button.MouseButton1Click:Connect(callback)
+        end
+    end
+
+    return tab
+end
 
         function tab:CreateSection(name)
             local section = {}
