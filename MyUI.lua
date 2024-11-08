@@ -24,12 +24,11 @@ function MyUI:CreateWindow(config)
     
     -- Create the main UI window
     local screenGui = Instance.new("ScreenGui")
-    local mainFrame = Instance.new("Frame")
-
-    -- Window Styling
     screenGui.Name = window.Title
     screenGui.Parent = game.CoreGui
 
+    -- Main frame
+    local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0.32, 0, 0.52, 0)
     mainFrame.Position = UDim2.new(0.34, 0, 0.24, 0)
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark theme color
@@ -37,13 +36,19 @@ function MyUI:CreateWindow(config)
     mainFrame.Parent = screenGui
     createUICorner(mainFrame, 10) -- Rounded corners
 
+    -- Add outline
+    local outline = Instance.new("UIStroke")
+    outline.Thickness = 2
+    outline.Color = Color3.fromRGB(0, 170, 255)
+    outline.Parent = mainFrame
+
     -- Title Label
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Text = window.Title
     titleLabel.Size = UDim2.new(1, 0, 0.1, 0)
     titleLabel.BackgroundTransparency = 1
     titleLabel.TextScaled = true
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text color
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = mainFrame
 
@@ -58,17 +63,16 @@ function MyUI:CreateWindow(config)
     closeButton.TextSize = 20
     closeButton.Parent = mainFrame
     createUICorner(closeButton, 5)
+    createHoverEffect(closeButton, Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 50, 50))
 
-    -- Close Button functionality
-    createHoverEffect(closeButton, Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 50, 50)) -- Hover effect
+    -- Close button functionality to destroy the entire ScreenGui
     closeButton.MouseButton1Click:Connect(function()
-        window:Destroy()
+        screenGui:Destroy()
     end)
 
-    -- Draggable functionality (Smooth dragging)
+    -- Draggable functionality
     local dragging = false
     local dragStart
-    local dragInput
     local startPos
 
     local function updateDrag(input)
@@ -117,31 +121,24 @@ function MyUI:CreateWindow(config)
         tabButton.BorderSizePixel = 0
         tabButton.Parent = mainFrame
         createUICorner(tabButton, 6)
-        createHoverEffect(tabButton, Color3.fromRGB(50, 50, 50), Color3.fromRGB(70, 70, 70)) -- Hover effect
+        createHoverEffect(tabButton, Color3.fromRGB(50, 50, 50), Color3.fromRGB(70, 70, 70))
 
-        -- Outline effect
-        local outline = Instance.new("UIStroke")
-        outline.Thickness = 2
-        outline.Color = Color3.fromRGB(0, 170, 255) -- Accent color
-        outline.Parent = tabButton
-
+        -- Tab Frame (only one displayed at a time)
         local tabFrame = Instance.new("Frame")
         tabFrame.Size = UDim2.new(1, 0, 0.8, 0)
         tabFrame.Position = UDim2.new(0, 0, 0.18, 0)
         tabFrame.BackgroundTransparency = 1
-        tabFrame.Visible = false
+        tabFrame.Visible = false -- Only visible when selected
         tabFrame.Parent = mainFrame
 
-        -- Show the tab's content on button click
+        -- Show the selected tab's content on button click
         tabButton.MouseButton1Click:Connect(function()
             for _, t in pairs(window.Tabs) do
-                t.TabFrame.Visible = false
-                -- Remove tab highlight effect
-                t.TabButton.BorderColor3 = Color3.fromRGB(50, 50, 50)
+                t.TabFrame.Visible = false -- Hide all tab frames
+                t.TabButton.BorderColor3 = Color3.fromRGB(50, 50, 50) -- Remove highlight from all buttons
             end
-            tabFrame.Visible = true
-            -- Highlight selected tab
-            tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255)
+            tabFrame.Visible = true -- Show only the selected tab
+            tabButton.BorderColor3 = Color3.fromRGB(0, 170, 255) -- Highlight the selected tab
         end)
 
         tab.TabFrame = tabFrame
@@ -161,7 +158,7 @@ function MyUI:CreateWindow(config)
             -- Section Frame
             local sectionFrame = Instance.new("Frame")
             sectionFrame.Size = UDim2.new(1, 0, 0.3, 0)
-            sectionFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Dark section background
+            sectionFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             sectionFrame.BorderSizePixel = 0
             sectionFrame.Parent = tabFrame
             createUICorner(sectionFrame, 8)
@@ -188,9 +185,8 @@ function MyUI:CreateWindow(config)
                 button.TextSize = 16
                 button.Parent = sectionFrame
                 createUICorner(button, 5)
-                createHoverEffect(button, Color3.fromRGB(0, 170, 255), Color3.fromRGB(0, 130, 200)) -- Hover effect
+                createHoverEffect(button, Color3.fromRGB(0, 170, 255), Color3.fromRGB(0, 130, 200))
                 
-                -- Button click callback
                 button.MouseButton1Click:Connect(callback)
             end
         end
