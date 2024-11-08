@@ -194,5 +194,3 @@ function MyUI:CreateWindow(config)
 end
 
 return MyUI
-
-return MyUI
