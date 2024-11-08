@@ -193,4 +193,5 @@ function MyUI:CreateWindow(config)
     return window
 end
 
+-- Return the UI library
 return MyUI
