@@ -115,12 +115,14 @@ function MyUI:CreateLoadingScreen(options)
     function loadingScreen:Show()
         print("Showing loading screen:", self.Title)
         -- Implement loading animation here (e.g., spinner or fade-in effect)
+        -- For now, we will simulate the loading screen with a print statement.
     end
 
     -- Hide the loading screen
     function loadingScreen:Hide()
         print("Hiding loading screen:", self.Title)
         -- Implement hide animation here (e.g., fade-out)
+        -- For now, we will simulate it with a print statement.
     end
 
     return loadingScreen
