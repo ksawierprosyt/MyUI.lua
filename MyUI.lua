@@ -17,6 +17,15 @@ local function createHoverEffect(button, defaultColor, hoverColor)
     end)
 end
 
+-- Utility function to add a stroke to a frame
+local function addStrokeToFrame(frame, color, thickness)
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = thickness
+    stroke.Color = color
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = frame
+end
+
 -- Save and Load Config System
 local function saveConfig(player, configData)
     local success, errorMessage = pcall(function()
@@ -62,6 +71,7 @@ function MyUI:CreateWindow(config)
     mainFrame.BorderSizePixel = 5
     mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
     createUICorner(mainFrame, 15)
+    addStrokeToFrame(mainFrame, Color3.fromRGB(0, 0, 0), 2)  -- Adding stroke
     mainFrame.Parent = screenGui
 
     -- Title Bar (Tabs)
@@ -70,6 +80,7 @@ function MyUI:CreateWindow(config)
     tabsFrame.Position = UDim2.new(0, 0, 0, 0)
     tabsFrame.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
     tabsFrame.Parent = mainFrame
+    addStrokeToFrame(tabsFrame, Color3.fromRGB(0, 0, 0), 2)  -- Adding stroke to tab bar
 
     -- Toggle Tab Button
     local toggleTab = Instance.new("TextButton")
@@ -79,6 +90,7 @@ function MyUI:CreateWindow(config)
     toggleTab.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
     toggleTab.TextColor3 = Color3.fromRGB(255, 255, 255)
     createUICorner(toggleTab, 10)
+    createHoverEffect(toggleTab, Color3.fromRGB(200, 150, 50), Color3.fromRGB(180, 120, 40))  -- Hover effect
     toggleTab.Parent = tabsFrame
 
     -- Textbox Tab Button
@@ -89,6 +101,7 @@ function MyUI:CreateWindow(config)
     textboxTab.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
     textboxTab.TextColor3 = Color3.fromRGB(255, 255, 255)
     createUICorner(textboxTab, 10)
+    createHoverEffect(textboxTab, Color3.fromRGB(200, 150, 50), Color3.fromRGB(180, 120, 40))  -- Hover effect
     textboxTab.Parent = tabsFrame
 
     -- Config Tab Setup
@@ -116,83 +129,18 @@ function MyUI:CreateWindow(config)
         saveConfig(player, configData) -- Save image URL
     end)
 
-    -- Toggle (Checkbox) for SaveConfig
-    local saveConfigToggle = Instance.new("TextButton")
-    saveConfigToggle.Text = configData.saveConfig and "Enabled" or "Disabled"
-    saveConfigToggle.Size = UDim2.new(0.3, 0, 0.1, 0)
-    saveConfigToggle.Position = UDim2.new(0.1, 0, 0.35, 0)
-    saveConfigToggle.BackgroundColor3 = configData.saveConfig and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    saveConfigToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    createUICorner(saveConfigToggle, 10)
-    saveConfigToggle.Parent = configFrame
-
-    -- Toggle state saving and loading
-    saveConfigToggle.MouseButton1Click:Connect(function()
-        configData.saveConfig = not configData.saveConfig
-        saveConfig(player, configData)
-        saveConfigToggle.Text = configData.saveConfig and "Enabled" or "Disabled"
-        saveConfigToggle.BackgroundColor3 = configData.saveConfig and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    end)
-
-    -- Color Picker for text color change
-    local colorPicker = Instance.new("TextButton")
-    colorPicker.Text = "Pick Color"
-    colorPicker.Size = UDim2.new(0.2, 0, 0.1, 0)
-    colorPicker.Position = UDim2.new(0.6, 0, 0.2, 0)
-    colorPicker.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-    colorPicker.TextColor3 = Color3.fromRGB(255, 255, 255)
-    createUICorner(colorPicker, 10)
-    colorPicker.Parent = configFrame
-    colorPicker.MouseButton1Click:Connect(function()
-        -- Simple color picker logic (in reality, this would be more complex)
-        local newColor = Color3.fromHSV(math.random(), 1, 1)
-        imageUrlTextbox.TextColor3 = newColor
-    end)
-
-    -- Slider Example (Custom Implementation)
-    local sliderFrame = Instance.new("Frame")
-    sliderFrame.Size = UDim2.new(0.8, 0, 0.1, 0)
-    sliderFrame.Position = UDim2.new(0.1, 0, 0.35, 0)
-    sliderFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    sliderFrame.BorderSizePixel = 2
-    sliderFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    createUICorner(sliderFrame, 15)
-    sliderFrame.Parent = configFrame
-
-    local sliderValueLabel = Instance.new("TextLabel")
-    sliderValueLabel.Text = "Slider Value: 50"
-    sliderValueLabel.Size = UDim2.new(1, 0, 0.2, 0)
-    sliderValueLabel.Position = UDim2.new(0, 0, 0, 0)
-    sliderValueLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-    sliderValueLabel.TextSize = 18
-    sliderValueLabel.Parent = sliderFrame
-
-    -- Custom slider implementation
-    local slider = Instance.new("Frame")
-    slider.Size = UDim2.new(1, 0, 0.8, 0)
-    slider.Position = UDim2.new(0, 0, 0.2, 0)
-    slider.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    slider.Parent = sliderFrame
-
-    local sliderThumb = Instance.new("Frame")
-    sliderThumb.Size = UDim2.new(0, 20, 1, 0)
-    sliderThumb.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    sliderThumb.Parent = slider
-
-    sliderThumb.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local startPos = input.Position.X
-            local sliderStartPos = slider.AbsolutePosition.X
-            local sliderEndPos = slider.AbsolutePosition.X + slider.AbsoluteSize.X
-            game:GetService("UserInputService").InputChanged:Connect(function(change)
-                if change.UserInputType == Enum.UserInputType.MouseMovement then
-                    local newX = math.clamp(change.Position.X - sliderStartPos, 0, slider.AbsoluteSize.X)
-                    sliderThumb.Position = UDim2.new(0, newX, 0, 0)
-                    local value = math.floor((newX / slider.AbsoluteSize.X) * 100)
-                    sliderValueLabel.Text = "Slider Value: " .. value
-                end
-            end)
-        end
+    -- Close Button (X)
+    local closeButton = Instance.new("TextButton")
+    closeButton.Text = "X"
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(1, -30, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    createUICorner(closeButton, 10)
+    createHoverEffect(closeButton, Color3.fromRGB(255, 0, 0), Color3.fromRGB(200, 0, 0))  -- Hover effect
+    closeButton.Parent = mainFrame
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()  -- Closes the UI window when clicked
     end)
 
     -- Return the window object for further configuration
