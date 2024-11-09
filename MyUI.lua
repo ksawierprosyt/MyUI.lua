@@ -104,7 +104,7 @@ function MyUI:CreateWindow(options)
 end
 
 -- Function to create an optional loading screen
-function MyUI:CreateLoadingScreen(options)
+function MyUI.CreateLoadingScreen(options)
     local loadingScreen = {
         Title = options.Title or "Loading",
         Subtitle = options.Subtitle or "",
