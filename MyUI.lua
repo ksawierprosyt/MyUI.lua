@@ -1,193 +1,202 @@
--- MyUI Framework: Modular UI system for Roblox
-
 local MyUI = {}
-local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
 
--- Function to create the main window
-function MyUI:CreateWindow(options)
-    local window = Instance.new("Frame")
-    window.Name = options.Name or "Default Window"
-    window.Size = UDim2.new(0, 600, 0, 400)
-    window.Position = UDim2.new(0.5, -300, 0.5, -200)
-    window.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    window.BorderSizePixel = 0
-    window.AnchorPoint = Vector2.new(0.5, 0.5)
-    window.Parent = ScreenGui
-
-    local title = Instance.new("TextLabel")
-    title.Text = options.Name or "My UI"
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.TextSize = 24
-    title.TextAlignment = Enum.TextAlignment.Center
-    title.Parent = window
-
-    -- Function to create a tab in the window
-    function window:CreateTab(name)
-        local tab = Instance.new("Frame")
-        tab.Size = UDim2.new(1, 0, 0, 40)
-        tab.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        tab.BorderSizePixel = 0
-        tab.Position = UDim2.new(0, 0, 0, 40)
-        tab.Parent = window
-
-        local tabButton = Instance.new("TextButton")
-        tabButton.Text = name
-        tabButton.Size = UDim2.new(1, 0, 0, 40)
-        tabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tabButton.TextSize = 20
-        tabButton.TextAlignment = Enum.TextAlignment.Center
-        tabButton.Parent = tab
-
-        -- Handle tab click (toggle sections)
-        tabButton.MouseButton1Click:Connect(function()
-            for _, child in pairs(window:GetChildren()) do
-                if child:IsA("Frame") and child ~= tab then
-                    child.Visible = false
-                end
-            end
-            tab.Visible = true
-        end)
-
-        -- Create a section inside the tab
-        local section = Instance.new("Frame")
-        section.Size = UDim2.new(1, 0, 1, -80) -- Adjust for the title and tab button
-        section.Position = UDim2.new(0, 0, 0, 80)
-        section.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        section.Parent = window
-        section.Visible = false -- Initially hidden until tab is clicked
-
-        -- Function to create buttons in the section
-        function section:CreateButton(label, callback)
-            local button = Instance.new("TextButton")
-            button.Text = label
-            button.Size = UDim2.new(0, 200, 0, 40)
-            button.Position = UDim2.new(0.5, -100, 0, 10)
-            button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            button.TextSize = 18
-            button.Parent = section
-
-            button.MouseButton1Click:Connect(function()
-                callback()
-            end)
-        end
-
-        -- Function to create sliders in the section
-        function section:CreateSlider(label, min, max, default, callback)
-            local sliderFrame = Instance.new("Frame")
-            sliderFrame.Size = UDim2.new(1, -40, 0, 60)
-            sliderFrame.Position = UDim2.new(0, 20, 0, 60)
-            sliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            sliderFrame.Parent = section
-
-            local sliderBar = Instance.new("Frame")
-            sliderBar.Size = UDim2.new(1, 0, 0, 10)
-            sliderBar.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-            sliderBar.Parent = sliderFrame
-
-            local sliderHandle = Instance.new("Frame")
-            sliderHandle.Size = UDim2.new(0, 20, 0, 20)
-            sliderHandle.Position = UDim2.new(0, 0, 0, -5)
-            sliderHandle.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-            sliderHandle.Parent = sliderBar
-
-            -- Update slider value on drag
-            local dragging = false
-            sliderHandle.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = true
-                end
-            end)
-
-            sliderHandle.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false
-                end
-            end)
-
-            UIS.InputChanged:Connect(function(input)
-                if dragging then
-                    local pos = math.clamp(input.Position.X - sliderBar.AbsolutePosition.X, 0, sliderBar.AbsoluteSize.X)
-                    sliderHandle.Position = UDim2.new(0, pos - sliderHandle.Size.X.Offset / 2, 0, -5)
-                    local value = math.floor((pos / sliderBar.AbsoluteSize.X) * (max - min) + min)
-                    callback(value)
-                end
-            end)
-
-            -- Set initial slider value
-            local initialPos = (default - min) / (max - min) * sliderBar.AbsoluteSize.X
-            sliderHandle.Position = UDim2.new(0, initialPos - sliderHandle.Size.X.Offset / 2, 0, -5)
-        end
-
-        -- Create color picker (just a simple button for now)
-        function section:CreateColorPicker(label, defaultColor, callback)
-            local colorPickerButton = Instance.new("TextButton")
-            colorPickerButton.Text = label
-            colorPickerButton.Size = UDim2.new(0, 200, 0, 40)
-            colorPickerButton.Position = UDim2.new(0.5, -100, 0, 110)
-            colorPickerButton.BackgroundColor3 = defaultColor
-            colorPickerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            colorPickerButton.TextSize = 18
-            colorPickerButton.Parent = section
-
-            colorPickerButton.MouseButton1Click:Connect(function()
-                local newColor = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255)) -- random color
-                colorPickerButton.BackgroundColor3 = newColor
-                callback(newColor)
-            end)
-        end
-
-        -- Return the created section
-        return section
-    end
-
-    -- Return the created window
-    return window
+-- Utility function for creating rounded corners
+local function createUICorner(parent, cornerRadius)
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, cornerRadius)
+    uiCorner.Parent = parent
 end
 
--- Function to create an optional loading screen
-function MyUI.CreateLoadingScreen(options)
-    local loadingScreen = Instance.new("Frame")
-    loadingScreen.Size = UDim2.new(1, 0, 1, 0)
-    loadingScreen.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    loadingScreen.BackgroundTransparency = 0.7
-    loadingScreen.Parent = ScreenGui
+-- Utility function to create button hover effect
+local function createHoverEffect(button, defaultColor, hoverColor)
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = hoverColor
+    end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = defaultColor
+    end)
+end
 
-    local title = Instance.new("TextLabel")
-    title.Text = options.Title or "Loading"
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.TextSize = 24
-    title.TextAlignment = Enum.TextAlignment.Center
-    title.Parent = loadingScreen
-
-    local subtitle = Instance.new("TextLabel")
-    subtitle.Text = options.Subtitle or ""
-    subtitle.Size = UDim2.new(1, 0, 0, 40)
-    subtitle.Position = UDim2.new(0, 0, 0, 40)
-    subtitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    subtitle.TextSize = 18
-    subtitle.TextAlignment = Enum.TextAlignment.Center
-    subtitle.Parent = loadingScreen
-
-    -- Show the loading screen with animation
-    function loadingScreen:Show()
-        loadingScreen.Visible = true
+-- Save and Load Config System
+local function saveConfig(player, configData)
+    local success, errorMessage = pcall(function()
+        local dataStore = game:GetService("DataStoreService"):GetDataStore("MyUI_Config")
+        dataStore:SetAsync(player.UserId, configData)
+    end)
+    
+    if not success then
+        warn("Failed to save config: " .. errorMessage)
     end
+end
 
-    -- Hide the loading screen
-    function loadingScreen:Hide()
-        loadingScren.Visible = false
+local function loadConfig(player)
+    local success, result = pcall(function()
+        local dataStore = game:GetService("DataStoreService"):GetDataStore("MyUI_Config")
+        return dataStore:GetAsync(player.UserId)
+    end)
+    
+    if success then
+        return result
+    else
+        warn("Failed to load config.")
+        return nil
     end
+end
 
-    return loadingScreen
+function MyUI:CreateWindow(config)
+    local window = {}
+    window.Title = config.Name or "Galaxy Window"
+
+    -- Setup to store configuration (to load and save the state later)
+    local player = game.Players.LocalPlayer
+    local configData = loadConfig(player) or {}
+
+    -- Main Frame
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = player.PlayerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    mainFrame.BorderSizePixel = 5
+    mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    createUICorner(mainFrame, 15)
+    mainFrame.Parent = screenGui
+
+    -- Title Bar (Tabs)
+    local tabsFrame = Instance.new("Frame")
+    tabsFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    tabsFrame.Position = UDim2.new(0, 0, 0, 0)
+    tabsFrame.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+    tabsFrame.Parent = mainFrame
+
+    -- Toggle Tab Button
+    local toggleTab = Instance.new("TextButton")
+    toggleTab.Text = "Toggle"
+    toggleTab.Size = UDim2.new(0.2, 0, 1, 0)
+    toggleTab.Position = UDim2.new(0, 0, 0, 0)
+    toggleTab.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
+    toggleTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+    createUICorner(toggleTab, 10)
+    toggleTab.Parent = tabsFrame
+
+    -- Textbox Tab Button
+    local textboxTab = Instance.new("TextButton")
+    textboxTab.Text = "Textbox"
+    textboxTab.Size = UDim2.new(0.2, 0, 1, 0)
+    textboxTab.Position = UDim2.new(0.2, 0, 0, 0)
+    textboxTab.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
+    textboxTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+    createUICorner(textboxTab, 10)
+    textboxTab.Parent = tabsFrame
+
+    -- Config Tab Setup
+    local configFrame = Instance.new("Frame")
+    configFrame.Size = UDim2.new(1, 0, 0.9, 0)
+    configFrame.Position = UDim2.new(0, 0, 0.1, 0)
+    configFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+    createUICorner(configFrame, 15)
+    configFrame.Parent = mainFrame
+
+    -- Image URL Textbox
+    local imageUrlTextbox = Instance.new("TextBox")
+    imageUrlTextbox.Size = UDim2.new(0.8, 0, 0.1, 0)
+    imageUrlTextbox.Position = UDim2.new(0.1, 0, 0.2, 0)
+    imageUrlTextbox.Text = configData.imageUrl or "" 
+    imageUrlTextbox.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+    imageUrlTextbox.TextColor3 = Color3.fromRGB(0, 0, 0)
+    createUICorner(imageUrlTextbox, 10)
+    imageUrlTextbox.Parent = configFrame
+
+    -- Image URL saving logic
+    imageUrlTextbox.FocusLost:Connect(function()
+        local imageUrl = imageUrlTextbox.Text
+        configData.imageUrl = imageUrl
+        saveConfig(player, configData) -- Save image URL
+    end)
+
+    -- Toggle (Checkbox) for SaveConfig
+    local saveConfigToggle = Instance.new("TextButton")
+    saveConfigToggle.Text = configData.saveConfig and "Enabled" or "Disabled"
+    saveConfigToggle.Size = UDim2.new(0.3, 0, 0.1, 0)
+    saveConfigToggle.Position = UDim2.new(0.1, 0, 0.35, 0)
+    saveConfigToggle.BackgroundColor3 = configData.saveConfig and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    saveConfigToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    createUICorner(saveConfigToggle, 10)
+    saveConfigToggle.Parent = configFrame
+
+    -- Toggle state saving and loading
+    saveConfigToggle.MouseButton1Click:Connect(function()
+        configData.saveConfig = not configData.saveConfig
+        saveConfig(player, configData)
+        saveConfigToggle.Text = configData.saveConfig and "Enabled" or "Disabled"
+        saveConfigToggle.BackgroundColor3 = configData.saveConfig and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    end)
+
+    -- Color Picker for text color change
+    local colorPicker = Instance.new("TextButton")
+    colorPicker.Text = "Pick Color"
+    colorPicker.Size = UDim2.new(0.2, 0, 0.1, 0)
+    colorPicker.Position = UDim2.new(0.6, 0, 0.2, 0)
+    colorPicker.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    colorPicker.TextColor3 = Color3.fromRGB(255, 255, 255)
+    createUICorner(colorPicker, 10)
+    colorPicker.Parent = configFrame
+    colorPicker.MouseButton1Click:Connect(function()
+        -- Simple color picker logic (in reality, this would be more complex)
+        local newColor = Color3.fromHSV(math.random(), 1, 1)
+        imageUrlTextbox.TextColor3 = newColor
+    end)
+
+    -- Slider Example (Custom Implementation)
+    local sliderFrame = Instance.new("Frame")
+    sliderFrame.Size = UDim2.new(0.8, 0, 0.1, 0)
+    sliderFrame.Position = UDim2.new(0.1, 0, 0.35, 0)
+    sliderFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    sliderFrame.BorderSizePixel = 2
+    sliderFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    createUICorner(sliderFrame, 15)
+    sliderFrame.Parent = configFrame
+
+    local sliderValueLabel = Instance.new("TextLabel")
+    sliderValueLabel.Text = "Slider Value: 50"
+    sliderValueLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    sliderValueLabel.Position = UDim2.new(0, 0, 0, 0)
+    sliderValueLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+    sliderValueLabel.TextSize = 18
+    sliderValueLabel.Parent = sliderFrame
+
+    -- Custom slider implementation
+    local slider = Instance.new("Frame")
+    slider.Size = UDim2.new(1, 0, 0.8, 0)
+    slider.Position = UDim2.new(0, 0, 0.2, 0)
+    slider.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    slider.Parent = sliderFrame
+
+    local sliderThumb = Instance.new("Frame")
+    sliderThumb.Size = UDim2.new(0, 20, 1, 0)
+    sliderThumb.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    sliderThumb.Parent = slider
+
+    sliderThumb.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            local startPos = input.Position.X
+            local sliderStartPos = slider.AbsolutePosition.X
+            local sliderEndPos = slider.AbsolutePosition.X + slider.AbsoluteSize.X
+            game:GetService("UserInputService").InputChanged:Connect(function(change)
+                if change.UserInputType == Enum.UserInputType.MouseMovement then
+                    local newX = math.clamp(change.Position.X - sliderStartPos, 0, slider.AbsoluteSize.X)
+                    sliderThumb.Position = UDim2.new(0, newX, 0, 0)
+                    local value = math.floor((newX / slider.AbsoluteSize.X) * 100)
+                    sliderValueLabel.Text = "Slider Value: " .. value
+                end
+            end)
+        end
+    end)
+
+    -- Return the window object for further configuration
+    return window
 end
 
 return MyUI
