@@ -1,4 +1,4 @@
-local MyUI = {}
+local KsawierHub = {}
 
 -- Utility function for creating rounded corners
 local function createUICorner(parent, cornerRadius)
@@ -29,7 +29,7 @@ end
 -- Save and Load Config System
 local function saveConfig(player, configData)
     local success, errorMessage = pcall(function()
-        local dataStore = game:GetService("DataStoreService"):GetDataStore("MyUI_Config")
+        local dataStore = game:GetService("DataStoreService"):GetDataStore("KsawierHub_Config")
         dataStore:SetAsync(player.UserId, configData)
     end)
     
@@ -40,7 +40,7 @@ end
 
 local function loadConfig(player)
     local success, result = pcall(function()
-        local dataStore = game:GetService("DataStoreService"):GetDataStore("MyUI_Config")
+        local dataStore = game:GetService("DataStoreService"):GetDataStore("KsawierHub_Config")
         return dataStore:GetAsync(player.UserId)
     end)
     
@@ -52,9 +52,9 @@ local function loadConfig(player)
     end
 end
 
-function MyUI:CreateWindow(config)
+function KsawierHub:CreateWindow(config)
     local window = {}
-    window.Title = config.Name or "Galaxy Window"
+    window.Title = config.Name or "Ksawier Hub"
 
     -- Setup to store configuration (to load and save the state later)
     local player = game.Players.LocalPlayer
@@ -147,4 +147,4 @@ function MyUI:CreateWindow(config)
     return window
 end
 
-return MyUI
+return KsawierHub
