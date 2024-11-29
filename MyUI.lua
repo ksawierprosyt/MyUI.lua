@@ -1,13 +1,11 @@
 local KsawierHub = {}
 
--- Utility function for creating rounded corners
 local function createUICorner(parent, cornerRadius)
     local uiCorner = Instance.new("UICorner")
     uiCorner.CornerRadius = UDim.new(0, cornerRadius)
     uiCorner.Parent = parent
 end
 
--- Utility function to create button hover effect
 local function createHoverEffect(button, defaultColor, hoverColor)
     button.MouseEnter:Connect(function()
         button.BackgroundColor3 = hoverColor
@@ -17,7 +15,6 @@ local function createHoverEffect(button, defaultColor, hoverColor)
     end)
 end
 
--- Utility function to add a stroke to a frame
 local function addStrokeToFrame(frame, color, thickness)
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = thickness
@@ -26,7 +23,6 @@ local function addStrokeToFrame(frame, color, thickness)
     stroke.Parent = frame
 end
 
--- Function to create a window
 function KsawierHub:CreateWindow(config)
     local window = {}
     local player = game.Players.LocalPlayer
@@ -38,7 +34,7 @@ function KsawierHub:CreateWindow(config)
 
     -- Main Frame
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0) -- Adjust as needed
+    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
     mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     mainFrame.BorderSizePixel = 0
@@ -52,6 +48,20 @@ function KsawierHub:CreateWindow(config)
     titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     createUICorner(titleBar, 10)
     titleBar.Parent = mainFrame
+
+    -- Icon (if provided)
+    if config.Icon and config.Icon ~= 0 then
+        local icon = Instance.new("ImageLabel")
+        icon.Size = UDim2.new(0.1, 0, 1, 0)
+        icon.Position = UDim2.new(0.05, 0, 0, 0)
+        icon.BackgroundTransparency = 1
+        if type(config.Icon) == "string" then
+            icon.Image = config.Icon -- Assume a Lucide Icon
+        elseif type(config.Icon) == "number" then
+            icon.Image = "rbxassetid://" .. config.Icon -- Roblox Image ID
+        end
+        icon.Parent = titleBar
+    end
 
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Text = config.Name or "KsawierHub"
@@ -77,37 +87,72 @@ function KsawierHub:CreateWindow(config)
         screenGui:Destroy()
     end)
 
-    -- Content Area
-    local contentFrame = Instance.new("Frame")
-    contentFrame.Size = UDim2.new(1, 0, 0.9, 0)
-    contentFrame.Position = UDim2.new(0, 0, 0.1, 0)
-    contentFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-    createUICorner(contentFrame, 10)
-    contentFrame.Parent = mainFrame
+    -- Configuration Saving
+    if config.ConfigurationSaving and config.ConfigurationSaving.Enabled then
+        local saveFolder = config.ConfigurationSaving.FolderName or "KsawierHub"
+        local saveFile = config.ConfigurationSaving.FileName or "Config"
 
-    -- Add tabs/buttons based on the config
-    if config.Tabs then
-        for index, tabName in ipairs(config.Tabs) do
-            local tabButton = Instance.new("TextButton")
-            tabButton.Text = tabName
-            tabButton.Size = UDim2.new(0.2, 0, 0.1, 0)
-            tabButton.Position = UDim2.new(0.2 * (index - 1), 0, 0, 0)
-            tabButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-            tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            createUICorner(tabButton, 10)
-            createHoverEffect(tabButton, Color3.fromRGB(100, 100, 100), Color3.fromRGB(80, 80, 80))
-            tabButton.Parent = contentFrame
+        -- Load Configuration (if exists)
+        local success, data = pcall(function()
+            return game:GetService("HttpService"):JSONDecode(
+                game:GetService("DataStoreService")
+                    :GetDataStore(saveFolder)
+                    :GetAsync(saveFile)
+            )
+        end)
 
-            -- Tab switching logic (Add frames for each tab here)
-            tabButton.MouseButton1Click:Connect(function()
-                print("Tab clicked: " .. tabName)
-                -- You can implement logic to show/hide frames based on the tab clicked
-            end)
+        if success and data then
+            print("Loaded Configuration:", data)
+        else
+            print("No previous configuration found or failed to load.")
         end
     end
 
-    -- Return the window object for further customization
+    -- Discord Prompt (if enabled)
+    if config.Discord and config.Discord.Enabled then
+        print("Prompting Discord Join for Invite:", config.Discord.Invite)
+    end
+
+    -- Key System
+    if config.KeySystem then
+        local keyFrame = Instance.new("Frame")
+        keyFrame.Size = UDim2.new(0.5, 0, 0.3, 0)
+        keyFrame.Position = UDim2.new(0.25, 0, 0.35, 0)
+        keyFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        createUICorner(keyFrame, 10)
+        keyFrame.Parent = screenGui
+
+        local keyInput = Instance.new("TextBox")
+        keyInput.PlaceholderText = "Enter Key"
+        keyInput.Size = UDim2.new(0.8, 0, 0.5, 0)
+        keyInput.Position = UDim2.new(0.1, 0, 0.25, 0)
+        keyInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        createUICorner(keyInput, 10)
+        keyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+        keyInput.Parent = keyFrame
+
+        local submitButton = Instance.new("TextButton")
+        submitButton.Text = "Submit"
+        submitButton.Size = UDim2.new(0.4, 0, 0.5, 0)
+        submitButton.Position = UDim2.new(0.3, 0, 0.8, -25)
+        submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        createUICorner(submitButton, 10)
+        createHoverEffect(submitButton, Color3.fromRGB(70, 70, 70), Color3.fromRGB(90, 90, 90))
+        submitButton.Parent = keyFrame
+
+        submitButton.MouseButton1Click:Connect(function()
+            local enteredKey = keyInput.Text
+            if table.find(config.KeySettings.Key, enteredKey) then
+                keyFrame:Destroy()
+                print("Key Accepted!")
+            else
+                print("Invalid Key!")
+            end
+        end)
+    end
+
     return window
 end
 
 return KsawierHub
+
