@@ -150,43 +150,44 @@ function KsawierHub:CreateWindow(config)
 end
 
 if config.LoadingScreen then
-    -- Create a loading screen frame
+    -- Create Loading Frame
     local loadingFrame = Instance.new("Frame")
     loadingFrame.Size = UDim2.new(1, 0, 1, 0)
     loadingFrame.Position = UDim2.new(0, 0, 0, 0)
-    loadingFrame.BackgroundColor3 = selectedTheme.Background
-    loadingFrame.ZIndex = 5 -- Ensure it overlays other UI elements
+    loadingFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    loadingFrame.ZIndex = 10
+    loadingFrame.Visible = true
     loadingFrame.Parent = screenGui
 
-    -- Loading Title
+    -- Title Label
     local loadingTitle = Instance.new("TextLabel")
     loadingTitle.Text = config.LoadingTitle or "Loading Interface"
     loadingTitle.Size = UDim2.new(0.6, 0, 0.1, 0)
-    loadingTitle.Position = UDim2.new(0.2, 0, 0.3, 0)
-    loadingTitle.TextColor3 = selectedTheme.Text
-    loadingTitle.Font = Enum.Font.SourceSansBold
+    loadingTitle.Position = UDim2.new(0.2, 0, 0.35, 0)
+    loadingTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loadingTitle.Font = Enum.Font.GothamBold
     loadingTitle.TextScaled = true
     loadingTitle.BackgroundTransparency = 1
     loadingTitle.Parent = loadingFrame
 
-    -- Loading Subtitle
+    -- Subtitle Label
     local loadingSubtitle = Instance.new("TextLabel")
     loadingSubtitle.Text = config.LoadingSubtitle or "Please wait while we load..."
-    loadingSubtitle.Size = UDim2.new(0.8, 0, 0.08, 0)
-    loadingSubtitle.Position = UDim2.new(0.1, 0, 0.4, 0)
-    loadingSubtitle.TextColor3 = selectedTheme.Text
-    loadingSubtitle.Font = Enum.Font.SourceSans
+    loadingSubtitle.Size = UDim2.new(0.8, 0, 0.05, 0)
+    loadingSubtitle.Position = UDim2.new(0.1, 0, 0.45, 0)
+    loadingSubtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+    loadingSubtitle.Font = Enum.Font.Gotham
     loadingSubtitle.TextScaled = true
     loadingSubtitle.BackgroundTransparency = 1
     loadingSubtitle.Parent = loadingFrame
 
     -- Loading Bar Background
     local loadingBarBackground = Instance.new("Frame")
-    loadingBarBackground.Size = UDim2.new(0.6, 0, 0.05, 0)
-    loadingBarBackground.Position = UDim2.new(0.2, 0, 0.5, 0)
+    loadingBarBackground.Size = UDim2.new(0.6, 0, 0.04, 0)
+    loadingBarBackground.Position = UDim2.new(0.2, 0, 0.55, 0)
     loadingBarBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     loadingBarBackground.BorderSizePixel = 0
-    createUICorner(loadingBarBackground, 8)
+    createUICorner(loadingBarBackground, 10)
     loadingBarBackground.Parent = loadingFrame
 
     -- Loading Bar (Animated)
@@ -195,28 +196,36 @@ if config.LoadingScreen then
     loadingBar.Position = UDim2.new(0, 0, 0, 0)
     loadingBar.BackgroundColor3 = Color3.fromRGB(85, 170, 255)
     loadingBar.BorderSizePixel = 0
-    createUICorner(loadingBar, 8)
+    createUICorner(loadingBar, 10)
     loadingBar.Parent = loadingBarBackground
 
-    -- Animate Loading Bar
+    -- Fade-In Animation
+    loadingFrame.BackgroundTransparency = 1
+    for i = 1, 0, -0.05 do
+        loadingFrame.BackgroundTransparency = i
+        task.wait(0.03)
+    end
+
+    -- Loading Bar Animation
     coroutine.wrap(function()
-        while loadingFrame.Parent do
-            for i = 0, 1, 0.01 do
-                loadingBar.Size = UDim2.new(i, 0, 1, 0)
-                task.wait(0.03)
-            end
-            task.wait(0.5)
-            loadingBar.Size = UDim2.new(0, 0, 1, 0)
+        for i = 0, 1, 0.01 do
+            loadingBar.Size = UDim2.new(i, 0, 1, 0)
+            task.wait(0.03)
         end
     end)()
 
-    -- Dismiss Loading Screen After Some Time
+    -- Fade-Out and Remove
     task.delay(3, function()
-        if loadingFrame and loadingFrame.Parent then
-            loadingFrame:Destroy()
+        for i = 0, 1, 0.05 do
+            loadingFrame.BackgroundTransparency = i
+            loadingTitle.TextTransparency = i
+            loadingSubtitle.TextTransparency = i
+            task.wait(0.03)
         end
+        loadingFrame:Destroy()
     end)
 end
+
 
     return window
 end
