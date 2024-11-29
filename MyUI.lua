@@ -23,9 +23,31 @@ local function addStrokeToFrame(frame, color, thickness)
     stroke.Parent = frame
 end
 
+-- Define themes
+local themes = {
+    Default = {
+        Background = Color3.fromRGB(45, 45, 45),
+        Accent = Color3.fromRGB(70, 70, 70),
+        Text = Color3.fromRGB(255, 255, 255)
+    },
+    Light = {
+        Background = Color3.fromRGB(240, 240, 240),
+        Accent = Color3.fromRGB(200, 200, 200),
+        Text = Color3.fromRGB(50, 50, 50)
+    },
+    Dark = {
+        Background = Color3.fromRGB(30, 30, 30),
+        Accent = Color3.fromRGB(50, 50, 50),
+        Text = Color3.fromRGB(255, 255, 255)
+    }
+}
+
 function KsawierHub:CreateWindow(config)
     local window = {}
     local player = game.Players.LocalPlayer
+
+    -- Select Theme
+    local selectedTheme = themes[config.Theme] or themes.Default
 
     -- ScreenGui
     local screenGui = Instance.new("ScreenGui")
@@ -36,38 +58,24 @@ function KsawierHub:CreateWindow(config)
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    mainFrame.BackgroundColor3 = selectedTheme.Background
     mainFrame.BorderSizePixel = 0
     createUICorner(mainFrame, 10)
-    addStrokeToFrame(mainFrame, Color3.fromRGB(0, 0, 0), 2)
+    addStrokeToFrame(mainFrame, selectedTheme.Accent, 2)
     mainFrame.Parent = screenGui
 
     -- Title Bar
     local titleBar = Instance.new("Frame")
     titleBar.Size = UDim2.new(1, 0, 0.1, 0)
-    titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    titleBar.BackgroundColor3 = selectedTheme.Accent
     createUICorner(titleBar, 10)
     titleBar.Parent = mainFrame
-
-    -- Icon (if provided)
-    if config.Icon and config.Icon ~= 0 then
-        local icon = Instance.new("ImageLabel")
-        icon.Size = UDim2.new(0.1, 0, 1, 0)
-        icon.Position = UDim2.new(0.05, 0, 0, 0)
-        icon.BackgroundTransparency = 1
-        if type(config.Icon) == "string" then
-            icon.Image = config.Icon -- Assume a Lucide Icon
-        elseif type(config.Icon) == "number" then
-            icon.Image = "rbxassetid://" .. config.Icon -- Roblox Image ID
-        end
-        icon.Parent = titleBar
-    end
 
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Text = config.Name or "KsawierHub"
     titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
     titleLabel.Position = UDim2.new(0.1, 0, 0, 0)
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextColor3 = selectedTheme.Text
     titleLabel.TextScaled = true
     titleLabel.Font = Enum.Font.SourceSansBold
     titleLabel.BackgroundTransparency = 1
@@ -87,57 +95,47 @@ function KsawierHub:CreateWindow(config)
         screenGui:Destroy()
     end)
 
-    -- Configuration Saving
-    if config.ConfigurationSaving and config.ConfigurationSaving.Enabled then
-        local saveFolder = config.ConfigurationSaving.FolderName or "KsawierHub"
-        local saveFile = config.ConfigurationSaving.FileName or "Config"
-
-        -- Load Configuration (if exists)
-        local success, data = pcall(function()
-            return game:GetService("HttpService"):JSONDecode(
-                game:GetService("DataStoreService")
-                    :GetDataStore(saveFolder)
-                    :GetAsync(saveFile)
-            )
-        end)
-
-        if success and data then
-            print("Loaded Configuration:", data)
-        else
-            print("No previous configuration found or failed to load.")
-        end
-    end
-
-    -- Discord Prompt (if enabled)
-    if config.Discord and config.Discord.Enabled then
-        print("Prompting Discord Join for Invite:", config.Discord.Invite)
-    end
-
-    -- Key System
+    -- Key System UI
     if config.KeySystem then
         local keyFrame = Instance.new("Frame")
-        keyFrame.Size = UDim2.new(0.5, 0, 0.3, 0)
-        keyFrame.Position = UDim2.new(0.25, 0, 0.35, 0)
-        keyFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-        createUICorner(keyFrame, 10)
+        keyFrame.Size = UDim2.new(0.4, 0, 0.3, 0)
+        keyFrame.Position = UDim2.new(0.3, 0, 0.35, 0)
+        keyFrame.BackgroundColor3 = selectedTheme.Background
+        createUICorner(keyFrame, 15)
+        addStrokeToFrame(keyFrame, selectedTheme.Accent, 2)
         keyFrame.Parent = screenGui
 
+        local keyTitle = Instance.new("TextLabel")
+        keyTitle.Text = "Enter Key"
+        keyTitle.Size = UDim2.new(0.8, 0, 0.2, 0)
+        keyTitle.Position = UDim2.new(0.1, 0, 0.1, 0)
+        keyTitle.TextColor3 = selectedTheme.Text
+        keyTitle.TextScaled = true
+        keyTitle.Font = Enum.Font.SourceSansBold
+        keyTitle.BackgroundTransparency = 1
+        keyTitle.Parent = keyFrame
+
         local keyInput = Instance.new("TextBox")
-        keyInput.PlaceholderText = "Enter Key"
-        keyInput.Size = UDim2.new(0.8, 0, 0.5, 0)
-        keyInput.Position = UDim2.new(0.1, 0, 0.25, 0)
-        keyInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        keyInput.PlaceholderText = "Key"
+        keyInput.Size = UDim2.new(0.8, 0, 0.25, 0)
+        keyInput.Position = UDim2.new(0.1, 0, 0.4, 0)
+        keyInput.BackgroundColor3 = selectedTheme.Accent
         createUICorner(keyInput, 10)
-        keyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+        keyInput.TextColor3 = selectedTheme.Text
+        keyInput.Font = Enum.Font.SourceSans
+        keyInput.TextScaled = true
         keyInput.Parent = keyFrame
 
         local submitButton = Instance.new("TextButton")
         submitButton.Text = "Submit"
-        submitButton.Size = UDim2.new(0.4, 0, 0.5, 0)
-        submitButton.Position = UDim2.new(0.3, 0, 0.8, -25)
-        submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        submitButton.Size = UDim2.new(0.4, 0, 0.25, 0)
+        submitButton.Position = UDim2.new(0.3, 0, 0.7, 0)
+        submitButton.BackgroundColor3 = selectedTheme.Accent
         createUICorner(submitButton, 10)
-        createHoverEffect(submitButton, Color3.fromRGB(70, 70, 70), Color3.fromRGB(90, 90, 90))
+        createHoverEffect(submitButton, selectedTheme.Accent, Color3.fromRGB(100, 100, 100))
+        submitButton.TextColor3 = selectedTheme.Text
+        submitButton.Font = Enum.Font.SourceSansBold
+        submitButton.TextScaled = true
         submitButton.Parent = keyFrame
 
         submitButton.MouseButton1Click:Connect(function()
@@ -155,4 +153,3 @@ function KsawierHub:CreateWindow(config)
 end
 
 return KsawierHub
-
