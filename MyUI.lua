@@ -26,124 +26,87 @@ local function addStrokeToFrame(frame, color, thickness)
     stroke.Parent = frame
 end
 
--- Save and Load Config System
-local function saveConfig(player, configData)
-    local success, errorMessage = pcall(function()
-        local dataStore = game:GetService("DataStoreService"):GetDataStore("KsawierHub_Config")
-        dataStore:SetAsync(player.UserId, configData)
-    end)
-    
-    if not success then
-        warn("Failed to save config: " .. errorMessage)
-    end
-end
-
-local function loadConfig(player)
-    local success, result = pcall(function()
-        local dataStore = game:GetService("DataStoreService"):GetDataStore("KsawierHub_Config")
-        return dataStore:GetAsync(player.UserId)
-    end)
-    
-    if success then
-        return result
-    else
-        warn("Failed to load config.")
-        return nil
-    end
-end
-
+-- Function to create a window
 function KsawierHub:CreateWindow(config)
     local window = {}
-    window.Title = config.Name or "Ksawier Hub"
-
-    -- Setup to store configuration (to load and save the state later)
     local player = game.Players.LocalPlayer
-    local configData = loadConfig(player) or {}
+
+    -- ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = config.Name or "KsawierHubWindow"
+    screenGui.Parent = player:WaitForChild("PlayerGui")
 
     -- Main Frame
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = player.PlayerGui
-
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0) -- Adjust as needed
     mainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
     mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    mainFrame.BorderSizePixel = 5
-    mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    createUICorner(mainFrame, 15)
-    addStrokeToFrame(mainFrame, Color3.fromRGB(0, 0, 0), 2)  -- Adding stroke
+    mainFrame.BorderSizePixel = 0
+    createUICorner(mainFrame, 10)
+    addStrokeToFrame(mainFrame, Color3.fromRGB(0, 0, 0), 2)
     mainFrame.Parent = screenGui
 
-    -- Title Bar (Tabs)
-    local tabsFrame = Instance.new("Frame")
-    tabsFrame.Size = UDim2.new(1, 0, 0.1, 0)
-    tabsFrame.Position = UDim2.new(0, 0, 0, 0)
-    tabsFrame.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
-    tabsFrame.Parent = mainFrame
-    addStrokeToFrame(tabsFrame, Color3.fromRGB(0, 0, 0), 2)  -- Adding stroke to tab bar
+    -- Title Bar
+    local titleBar = Instance.new("Frame")
+    titleBar.Size = UDim2.new(1, 0, 0.1, 0)
+    titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    createUICorner(titleBar, 10)
+    titleBar.Parent = mainFrame
 
-    -- Toggle Tab Button
-    local toggleTab = Instance.new("TextButton")
-    toggleTab.Text = "Toggle"
-    toggleTab.Size = UDim2.new(0.2, 0, 1, 0)
-    toggleTab.Position = UDim2.new(0, 0, 0, 0)
-    toggleTab.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
-    toggleTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-    createUICorner(toggleTab, 10)
-    createHoverEffect(toggleTab, Color3.fromRGB(200, 150, 50), Color3.fromRGB(180, 120, 40))  -- Hover effect
-    toggleTab.Parent = tabsFrame
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Text = config.Name or "KsawierHub"
+    titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
+    titleLabel.Position = UDim2.new(0.1, 0, 0, 0)
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextScaled = true
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Parent = titleBar
 
-    -- Textbox Tab Button
-    local textboxTab = Instance.new("TextButton")
-    textboxTab.Text = "Textbox"
-    textboxTab.Size = UDim2.new(0.2, 0, 1, 0)
-    textboxTab.Position = UDim2.new(0.2, 0, 0, 0)
-    textboxTab.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
-    textboxTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-    createUICorner(textboxTab, 10)
-    createHoverEffect(textboxTab, Color3.fromRGB(200, 150, 50), Color3.fromRGB(180, 120, 40))  -- Hover effect
-    textboxTab.Parent = tabsFrame
-
-    -- Config Tab Setup
-    local configFrame = Instance.new("Frame")
-    configFrame.Size = UDim2.new(1, 0, 0.9, 0)
-    configFrame.Position = UDim2.new(0, 0, 0.1, 0)
-    configFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-    createUICorner(configFrame, 15)
-    configFrame.Parent = mainFrame
-
-    -- Image URL Textbox
-    local imageUrlTextbox = Instance.new("TextBox")
-    imageUrlTextbox.Size = UDim2.new(0.8, 0, 0.1, 0)
-    imageUrlTextbox.Position = UDim2.new(0.1, 0, 0.2, 0)
-    imageUrlTextbox.Text = configData.imageUrl or "" 
-    imageUrlTextbox.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-    imageUrlTextbox.TextColor3 = Color3.fromRGB(0, 0, 0)
-    createUICorner(imageUrlTextbox, 10)
-    imageUrlTextbox.Parent = configFrame
-
-    -- Image URL saving logic
-    imageUrlTextbox.FocusLost:Connect(function()
-        local imageUrl = imageUrlTextbox.Text
-        configData.imageUrl = imageUrl
-        saveConfig(player, configData) -- Save image URL
-    end)
-
-    -- Close Button (X)
+    -- Close Button
     local closeButton = Instance.new("TextButton")
     closeButton.Text = "X"
-    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
-    closeButton.Position = UDim2.new(1, -30, 0, 0)
-    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.Size = UDim2.new(0.1, 0, 1, 0)
+    closeButton.Position = UDim2.new(0.9, 0, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     createUICorner(closeButton, 10)
-    createHoverEffect(closeButton, Color3.fromRGB(255, 0, 0), Color3.fromRGB(200, 0, 0))  -- Hover effect
-    closeButton.Parent = mainFrame
+    createHoverEffect(closeButton, Color3.fromRGB(200, 50, 50), Color3.fromRGB(170, 0, 0))
+    closeButton.Parent = titleBar
     closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()  -- Closes the UI window when clicked
+        screenGui:Destroy()
     end)
 
-    -- Return the window object for further configuration
+    -- Content Area
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, 0, 0.9, 0)
+    contentFrame.Position = UDim2.new(0, 0, 0.1, 0)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+    createUICorner(contentFrame, 10)
+    contentFrame.Parent = mainFrame
+
+    -- Add tabs/buttons based on the config
+    if config.Tabs then
+        for index, tabName in ipairs(config.Tabs) do
+            local tabButton = Instance.new("TextButton")
+            tabButton.Text = tabName
+            tabButton.Size = UDim2.new(0.2, 0, 0.1, 0)
+            tabButton.Position = UDim2.new(0.2 * (index - 1), 0, 0, 0)
+            tabButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+            tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            createUICorner(tabButton, 10)
+            createHoverEffect(tabButton, Color3.fromRGB(100, 100, 100), Color3.fromRGB(80, 80, 80))
+            tabButton.Parent = contentFrame
+
+            -- Tab switching logic (Add frames for each tab here)
+            tabButton.MouseButton1Click:Connect(function()
+                print("Tab clicked: " .. tabName)
+                -- You can implement logic to show/hide frames based on the tab clicked
+            end)
+        end
+    end
+
+    -- Return the window object for further customization
     return window
 end
 
