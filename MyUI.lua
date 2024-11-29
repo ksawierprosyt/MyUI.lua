@@ -97,57 +97,57 @@ function KsawierHub:CreateWindow(config)
 
     -- Key System UI
     if config.KeySystem then
-        local keyFrame = Instance.new("Frame")
-        keyFrame.Size = UDim2.new(0.4, 0, 0.3, 0)
-        keyFrame.Position = UDim2.new(0.3, 0, 0.35, 0)
-        keyFrame.BackgroundColor3 = selectedTheme.Background
-        createUICorner(keyFrame, 15)
-        addStrokeToFrame(keyFrame, selectedTheme.Accent, 2)
-        keyFrame.Parent = screenGui
+    local keyFrame = Instance.new("Frame")
+    keyFrame.Size = UDim2.new(0.4, 0, 0.35, 0) -- Increased height for better proportions
+    keyFrame.Position = UDim2.new(0.3, 0, 0.35, 0)
+    keyFrame.BackgroundColor3 = selectedTheme.Background
+    createUICorner(keyFrame, 15)
+    addStrokeToFrame(keyFrame, selectedTheme.Accent, 2)
+    keyFrame.Parent = screenGui
 
-        local keyTitle = Instance.new("TextLabel")
-        keyTitle.Text = "Enter Key"
-        keyTitle.Size = UDim2.new(0.8, 0, 0.2, 0)
-        keyTitle.Position = UDim2.new(0.1, 0, 0.1, 0)
-        keyTitle.TextColor3 = selectedTheme.Text
-        keyTitle.TextScaled = true
-        keyTitle.Font = Enum.Font.SourceSansBold
-        keyTitle.BackgroundTransparency = 1
-        keyTitle.Parent = keyFrame
+    local keyTitle = Instance.new("TextLabel")
+    keyTitle.Text = "Enter Key"
+    keyTitle.Size = UDim2.new(0.8, 0, 0.15, 0) -- Reduced height for cleaner layout
+    keyTitle.Position = UDim2.new(0.1, 0, 0.1, 0)
+    keyTitle.TextColor3 = selectedTheme.Text
+    keyTitle.TextScaled = true
+    keyTitle.Font = Enum.Font.SourceSansBold
+    keyTitle.BackgroundTransparency = 1
+    keyTitle.Parent = keyFrame
 
-        local keyInput = Instance.new("TextBox")
-        keyInput.PlaceholderText = "Key"
-        keyInput.Size = UDim2.new(0.8, 0, 0.25, 0)
-        keyInput.Position = UDim2.new(0.1, 0, 0.4, 0)
-        keyInput.BackgroundColor3 = selectedTheme.Accent
-        createUICorner(keyInput, 10)
-        keyInput.TextColor3 = selectedTheme.Text
-        keyInput.Font = Enum.Font.SourceSans
-        keyInput.TextScaled = true
-        keyInput.Parent = keyFrame
+    local keyInput = Instance.new("TextBox")
+    keyInput.PlaceholderText = "Enter your key here..."
+    keyInput.Size = UDim2.new(0.8, 0, 0.2, 0) -- Reduced height for sleek input
+    keyInput.Position = UDim2.new(0.1, 0, 0.3, 0) -- Positioned closer to the title
+    keyInput.BackgroundColor3 = selectedTheme.Accent
+    createUICorner(keyInput, 10)
+    keyInput.TextColor3 = selectedTheme.Text
+    keyInput.Font = Enum.Font.SourceSans
+    keyInput.TextScaled = true
+    keyInput.Parent = keyFrame
 
-        local submitButton = Instance.new("TextButton")
-        submitButton.Text = "Submit"
-        submitButton.Size = UDim2.new(0.4, 0, 0.25, 0)
-        submitButton.Position = UDim2.new(0.3, 0, 0.7, 0)
-        submitButton.BackgroundColor3 = selectedTheme.Accent
-        createUICorner(submitButton, 10)
-        createHoverEffect(submitButton, selectedTheme.Accent, Color3.fromRGB(100, 100, 100))
-        submitButton.TextColor3 = selectedTheme.Text
-        submitButton.Font = Enum.Font.SourceSansBold
-        submitButton.TextScaled = true
-        submitButton.Parent = keyFrame
+    local submitButton = Instance.new("TextButton")
+    submitButton.Text = "Submit"
+    submitButton.Size = UDim2.new(0.3, 0, 0.2, 0) -- Reduced width and height
+    submitButton.Position = UDim2.new(0.35, 0, 0.6, 0) -- Centered within the frame
+    submitButton.BackgroundColor3 = selectedTheme.Accent
+    createUICorner(submitButton, 10)
+    createHoverEffect(submitButton, selectedTheme.Accent, Color3.fromRGB(100, 100, 100))
+    submitButton.TextColor3 = selectedTheme.Text
+    submitButton.Font = Enum.Font.SourceSansBold
+    submitButton.TextScaled = true
+    submitButton.Parent = keyFrame
 
-        submitButton.MouseButton1Click:Connect(function()
-            local enteredKey = keyInput.Text
-            if table.find(config.KeySettings.Key, enteredKey) then
-                keyFrame:Destroy()
-                print("Key Accepted!")
-            else
-                print("Invalid Key!")
-            end
-        end)
-    end
+    submitButton.MouseButton1Click:Connect(function()
+        local enteredKey = keyInput.Text
+        if table.find(config.KeySettings.Key, enteredKey) then
+            keyFrame:Destroy()
+            print("Key Accepted!")
+        else
+            print("Invalid Key!")
+        end
+    end)
+end
 
     return window
 end
