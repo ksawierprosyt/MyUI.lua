@@ -187,6 +187,37 @@ function KsawierHub:CreateWindow(config)
         mainFrame.Visible = true -- Default to visible if no loading screen
     end
 
+        -- Discord Invite System
+    if config.Discord and config.Discord.Enabled then
+        local hasJoined = false
+
+        -- Check if joins are remembered
+        if config.Discord.RememberJoins then
+            hasJoined = player:FindFirstChild("JoinedDiscord") ~= nil
+        end
+
+        if not hasJoined then
+            local success, errorMessage = pcall(function()
+                -- Use Executor-supported Discord invite prompt
+                syn.request({
+                    Url = "https://discord.gg/" .. config.Discord.Invite,
+                    Method = "GET",
+                })
+            end)
+
+            if success then
+                print("Discord invite prompt sent.")
+                if config.Discord.RememberJoins then
+                    local joinedFlag = Instance.new("BoolValue")
+                    joinedFlag.Name = "JoinedDiscord"
+                    joinedFlag.Parent = player
+                end
+            else
+                warn("Failed to send Discord invite prompt: " .. errorMessage)
+            end
+        end
+    end
+
     return window
 end
 
