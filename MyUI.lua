@@ -149,6 +149,75 @@ function KsawierHub:CreateWindow(config)
     end)
 end
 
+if config.LoadingScreen then
+    -- Create a loading screen frame
+    local loadingFrame = Instance.new("Frame")
+    loadingFrame.Size = UDim2.new(1, 0, 1, 0)
+    loadingFrame.Position = UDim2.new(0, 0, 0, 0)
+    loadingFrame.BackgroundColor3 = selectedTheme.Background
+    loadingFrame.ZIndex = 5 -- Ensure it overlays other UI elements
+    loadingFrame.Parent = screenGui
+
+    -- Loading Title
+    local loadingTitle = Instance.new("TextLabel")
+    loadingTitle.Text = config.LoadingTitle or "Loading Interface"
+    loadingTitle.Size = UDim2.new(0.6, 0, 0.1, 0)
+    loadingTitle.Position = UDim2.new(0.2, 0, 0.3, 0)
+    loadingTitle.TextColor3 = selectedTheme.Text
+    loadingTitle.Font = Enum.Font.SourceSansBold
+    loadingTitle.TextScaled = true
+    loadingTitle.BackgroundTransparency = 1
+    loadingTitle.Parent = loadingFrame
+
+    -- Loading Subtitle
+    local loadingSubtitle = Instance.new("TextLabel")
+    loadingSubtitle.Text = config.LoadingSubtitle or "Please wait while we load..."
+    loadingSubtitle.Size = UDim2.new(0.8, 0, 0.08, 0)
+    loadingSubtitle.Position = UDim2.new(0.1, 0, 0.4, 0)
+    loadingSubtitle.TextColor3 = selectedTheme.Text
+    loadingSubtitle.Font = Enum.Font.SourceSans
+    loadingSubtitle.TextScaled = true
+    loadingSubtitle.BackgroundTransparency = 1
+    loadingSubtitle.Parent = loadingFrame
+
+    -- Loading Bar Background
+    local loadingBarBackground = Instance.new("Frame")
+    loadingBarBackground.Size = UDim2.new(0.6, 0, 0.05, 0)
+    loadingBarBackground.Position = UDim2.new(0.2, 0, 0.5, 0)
+    loadingBarBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    loadingBarBackground.BorderSizePixel = 0
+    createUICorner(loadingBarBackground, 8)
+    loadingBarBackground.Parent = loadingFrame
+
+    -- Loading Bar (Animated)
+    local loadingBar = Instance.new("Frame")
+    loadingBar.Size = UDim2.new(0, 0, 1, 0)
+    loadingBar.Position = UDim2.new(0, 0, 0, 0)
+    loadingBar.BackgroundColor3 = Color3.fromRGB(85, 170, 255)
+    loadingBar.BorderSizePixel = 0
+    createUICorner(loadingBar, 8)
+    loadingBar.Parent = loadingBarBackground
+
+    -- Animate Loading Bar
+    coroutine.wrap(function()
+        while loadingFrame.Parent do
+            for i = 0, 1, 0.01 do
+                loadingBar.Size = UDim2.new(i, 0, 1, 0)
+                task.wait(0.03)
+            end
+            task.wait(0.5)
+            loadingBar.Size = UDim2.new(0, 0, 1, 0)
+        end
+    end)()
+
+    -- Dismiss Loading Screen After Some Time
+    task.delay(3, function()
+        if loadingFrame and loadingFrame.Parent then
+            loadingFrame:Destroy()
+        end
+    end)
+end
+
     return window
 end
 
