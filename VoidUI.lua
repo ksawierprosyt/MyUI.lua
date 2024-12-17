@@ -1,12 +1,13 @@
 local VoidUI = {}
 
--- Create a Screen GUI
+-- Function to create the main window
 function VoidUI:CreateWindow(settings)
+    -- Screen GUI
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = settings.Name or "VoidHubUI"
     ScreenGui.Parent = game.CoreGui
 
-    -- Create the main frame for the window
+    -- Main Frame
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 400, 0, 300)
@@ -15,7 +16,7 @@ function VoidUI:CreateWindow(settings)
     MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     MainFrame.Parent = ScreenGui
 
-    -- Add title text
+    -- Title
     local Title = Instance.new("TextLabel")
     Title.Name = "Title"
     Title.Text = settings.Name or "Void Hub"
@@ -26,83 +27,78 @@ function VoidUI:CreateWindow(settings)
     Title.BackgroundTransparency = 1
     Title.Parent = MainFrame
 
-    -- Tabs container
-    local TabsContainer = Instance.new("Frame")
-    TabsContainer.Name = "TabsContainer"
-    TabsContainer.Size = UDim2.new(1, 0, 1, -30)
-    TabsContainer.Position = UDim2.new(0, 0, 0, 30)
-    TabsContainer.BackgroundTransparency = 1
-    TabsContainer.Parent = MainFrame
+    -- Configuration Saving
+    if settings.ConfigurationSaving and settings.ConfigurationSaving.Enabled then
+        VoidUI.SaveConfig = function(filename, data)
+            local folder = settings.ConfigurationSaving.FolderName or "VoidHubConfigs"
+            local file = settings.ConfigurationSaving.FileName or "Config"
 
-    -- Store tabs
-    local Tabs = {}
-
-    function Tabs:CreateTab(name)
-        local TabFrame = Instance.new("Frame")
-        TabFrame.Name = name
-        TabFrame.Size = UDim2.new(1, 0, 1, 0)
-        TabFrame.BackgroundTransparency = 1
-        TabFrame.Visible = #Tabs == 0 -- Show first tab by default
-        TabFrame.Parent = TabsContainer
-
-        -- Tab button
-        local TabButton = Instance.new("TextButton")
-        TabButton.Name = name .. "Button"
-        TabButton.Text = name
-        TabButton.Size = UDim2.new(0, 100, 0, 30)
-        TabButton.Position = UDim2.new(0, (#Tabs * 100), 0, 0)
-        TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TabButton.Parent = MainFrame
-
-        TabButton.MouseButton1Click:Connect(function()
-            for _, child in pairs(TabsContainer:GetChildren()) do
-                child.Visible = false
+            if not isfolder(folder) then
+                makefolder(folder)
             end
-            TabFrame.Visible = true
-        end)
+            writefile(folder .. "/" .. file, game:GetService("HttpService"):JSONEncode(data))
+        end
 
-        return TabFrame
+        VoidUI.LoadConfig = function(filename)
+            local folder = settings.ConfigurationSaving.FolderName or "VoidHubConfigs"
+            local file = settings.ConfigurationSaving.FileName or "Config"
+
+            if isfile(folder .. "/" .. file) then
+                return game:GetService("HttpService"):JSONDecode(readfile(folder .. "/" .. file))
+            end
+            return {}
+        end
     end
 
-    return Tabs
-end
+    -- Discord Prompt
+    if settings.Discord and settings.Discord.Enabled then
+        local success, error = pcall(function()
+            request({
+                Url = "http://discord.com/api/v9/invites/" .. settings.Discord.Invite,
+                Method = "POST"
+            })
+        end)
 
-function VoidUI:CreateButton(parent, settings, callback)
-    local Button = Instance.new("TextButton")
-    Button.Name = settings.Name or "Button"
-    Button.Text = settings.Text or "Click Me"
-    Button.Size = UDim2.new(0, 200, 0, 30)
-    Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.Parent = parent
+        if not success then
+            warn("Failed to send Discord invite: " .. error)
+        end
+    end
 
-    Button.MouseButton1Click:Connect(function()
-        callback()
-    end)
+    -- Key System
+    if settings.KeySystem then
+        local KeyFrame = Instance.new("Frame")
+        KeyFrame.Size = UDim2.new(0, 300, 0, 150)
+        KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+        KeyFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        KeyFrame.Parent = ScreenGui
 
-    return Button
-end
+        local KeyBox = Instance.new("TextBox")
+        KeyBox.PlaceholderText = "Enter Key"
+        KeyBox.Size = UDim2.new(0.8, 0, 0.2, 0)
+        KeyBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+        KeyBox.Parent = KeyFrame
 
-function VoidUI:CreateToggle(parent, settings, callback)
-    local Toggle = Instance.new("TextButton")
-    Toggle.Name = settings.Name or "Toggle"
-    Toggle.Text = settings.Text or "Toggle"
-    Toggle.Size = UDim2.new(0, 200, 0, 30)
-    Toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Toggle.Parent = parent
+        local SubmitButton = Instance.new("TextButton")
+        SubmitButton.Text = "Submit"
+        SubmitButton.Size = UDim2.new(0.8, 0, 0.2, 0)
+        SubmitButton.Position = UDim2.new(0.1, 0, 0.7, 0)
+        SubmitButton.Parent = KeyFrame
 
-    local State = false
+        SubmitButton.MouseButton1Click:Connect(function()
+            if table.find(settings.KeySettings.Key, KeyBox.Text) then
+                KeyFrame:Destroy()
+                print("Key Accepted")
+            else
+                KeyBox.Text = "Invalid Key!"
+            end
+        end)
+    end
 
-    Toggle.MouseButton1Click:Connect(function()
-        State = not State
-        Toggle.Text = settings.Text .. ": " .. (State and "ON" or "OFF")
-        callback(State)
-    end)
-
-    return Toggle
+    return {
+        AddTab = function(tabName)
+            -- Add tab functionality here
+        end
+    }
 end
 
 return VoidUI
-
